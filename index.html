@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>AURA — Futuristic Energy Reactor</title>
 
   <style>
@@ -28,6 +29,7 @@
 
     header h1 {
       font-size: 28px;
+      font-weight: 700;
     }
 
     header p {
@@ -61,45 +63,50 @@
 
     .info {
       position: absolute;
-      left: 20px;
-      bottom: 20px;
+      left: 18px;
+      bottom: 18px;
       padding: 14px 18px;
-      background: rgba(8, 11, 18, 0.8);
+      background: rgba(8, 11, 18, 0.85);
       border: 1px solid #303746;
       border-radius: 12px;
       backdrop-filter: blur(10px);
       z-index: 10;
     }
 
+    .info strong {
+      font-size: 14px;
+    }
+
     .info span {
       color: #9da5b4;
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .loading {
       position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       color: #9da5b4;
       font-size: 16px;
-      pointer-events: none;
+      z-index: 5;
     }
 
     .error {
       position: absolute;
-      inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
       text-align: center;
-      padding: 30px;
       color: #ff6b6b;
-      pointer-events: none;
+      line-height: 1.6;
+      display: none;
+      z-index: 5;
     }
 
     @media (max-width: 768px) {
+
       header {
         padding: 20px;
       }
@@ -113,8 +120,8 @@
       }
 
       .viewer {
-        height: 600px;
-        width: 95vw;
+        width: 100%;
+        height: 500px;
       }
     }
   </style>
@@ -122,417 +129,631 @@
 
 <body>
 
-  <header>
-    <h1>⚛️ AURA — Futuristic Energy Reactor</h1>
-    <p>Interactive 3D Energy Reactor</p>
-  </header>
+<header>
+  <h1>⚛️ AURA — Futuristic Energy Reactor</h1>
+  <p>Interactive 3D Energy Reactor</p>
+</header>
 
-  <main>
-    <div class="viewer" id="viewer">
+<main>
 
-      <div class="loading" id="loading">
-        Loading AURA Reactor...
-      </div>
+  <div class="viewer" id="viewer">
 
-      <div class="error" id="error">
-        Unable to load the 3D model.
-      </div>
-
-      <div class="info">
-        <strong>AURA Reactor</strong><br>
-        <span>Drag to rotate • Scroll to zoom</span>
-      </div>
-
+    <div class="loading" id="loading">
+      Loading AURA Reactor...
     </div>
-  </main>
+
+    <div class="error" id="error">
+      Failed to load the 3D model.<br>
+      Please check the GLB file path.
+    </div>
+
+    <div class="info">
+      <strong>AURA Reactor</strong><br>
+      <span>Drag to rotate • Scroll to zoom</span>
+    </div>
+
+  </div>
+
+</main>
 
 
-  <!--
-    IMPORTANT:
-    Import map fixes the "Failed to resolve module specifier 'three'"
-    error when using Three.js modules directly in the browser.
-  -->
+<script type="module">
 
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
-    }
-  }
-  </script>
+  /*
+   * THREE.JS
+   */
+
+  import * as THREE from
+    "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
 
 
-  <script type="module">
+  /*
+   * GLTF LOADER
+   */
 
-    import * as THREE from "three";
-
-    import { GLTFLoader } from
-      "three/addons/loaders/GLTFLoader.js";
-
-    import { OrbitControls } from
-      "three/addons/controls/OrbitControls.js";
+  import { GLTFLoader } from
+    "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js";
 
 
-    // --------------------------------------------------
-    // Container
-    // --------------------------------------------------
+  /*
+   * ORBIT CONTROLS
+   */
 
-    const container = document.getElementById("viewer");
-    const loading = document.getElementById("loading");
-    const errorMessage = document.getElementById("error");
-
-
-    // --------------------------------------------------
-    // Scene
-    // --------------------------------------------------
-
-    const scene = new THREE.Scene();
-
-    scene.background = new THREE.Color(0x080b12);
+  import { OrbitControls } from
+    "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/controls/OrbitControls.js";
 
 
-    // --------------------------------------------------
-    // Camera
-    // --------------------------------------------------
+  /*
+   * HTML ELEMENTS
+   */
 
-    const camera = new THREE.PerspectiveCamera(
+  const container =
+    document.getElementById("viewer");
+
+  const loading =
+    document.getElementById("loading");
+
+  const errorMessage =
+    document.getElementById("error");
+
+
+  /*
+   * SCENE
+   */
+
+  const scene =
+    new THREE.Scene();
+
+  scene.background =
+    new THREE.Color(0x080b12);
+
+
+  /*
+   * CAMERA
+   */
+
+  const camera =
+    new THREE.PerspectiveCamera(
       45,
-      container.clientWidth / container.clientHeight,
+      container.clientWidth /
+      container.clientHeight,
       0.1,
       1000
     );
 
-    camera.position.set(0, 2, 6);
+  camera.position.set(
+    0,
+    1.5,
+    6
+  );
 
 
-    // --------------------------------------------------
-    // Renderer
-    // --------------------------------------------------
+  /*
+   * RENDERER
+   */
 
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true
+  const renderer =
+    new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: false
     });
 
-    renderer.setPixelRatio(
-      Math.min(window.devicePixelRatio, 2)
-    );
+  renderer.setPixelRatio(
+    Math.min(
+      window.devicePixelRatio,
+      2
+    )
+  );
 
-    renderer.setSize(
-      container.clientWidth,
-      container.clientHeight
-    );
+  renderer.setSize(
+    container.clientWidth,
+    container.clientHeight
+  );
 
-    container.appendChild(renderer.domElement);
+  renderer.outputColorSpace =
+    THREE.SRGBColorSpace;
+
+  container.appendChild(
+    renderer.domElement
+  );
 
 
-    // --------------------------------------------------
-    // Lights
-    // --------------------------------------------------
+  /*
+   * LIGHTING
+   */
 
-    const ambientLight = new THREE.AmbientLight(
+  const ambientLight =
+    new THREE.AmbientLight(
       0xffffff,
       2
     );
 
-    scene.add(ambientLight);
+  scene.add(
+    ambientLight
+  );
 
 
-    const keyLight = new THREE.DirectionalLight(
+  const keyLight =
+    new THREE.DirectionalLight(
       0xffffff,
       3
     );
 
-    keyLight.position.set(4, 6, 5);
+  keyLight.position.set(
+    4,
+    6,
+    5
+  );
 
-    scene.add(keyLight);
+  scene.add(
+    keyLight
+  );
 
 
-    const fillLight = new THREE.PointLight(
+  const fillLight =
+    new THREE.PointLight(
       0x66ccff,
       20,
       20
     );
 
-    fillLight.position.set(-3, 3, 4);
+  fillLight.position.set(
+    -3,
+    3,
+    4
+  );
 
-    scene.add(fillLight);
+  scene.add(
+    fillLight
+  );
 
 
-    // --------------------------------------------------
-    // Orbit Controls
-    // --------------------------------------------------
+  /*
+   * EXTRA LIGHT
+   */
 
-    const controls = new OrbitControls(
+  const rimLight =
+    new THREE.PointLight(
+      0xffffff,
+      10,
+      15
+    );
+
+  rimLight.position.set(
+    3,
+    1,
+    -4
+  );
+
+  scene.add(
+    rimLight
+  );
+
+
+  /*
+   * ORBIT CONTROLS
+   */
+
+  const controls =
+    new OrbitControls(
       camera,
       renderer.domElement
     );
 
-    controls.enableDamping = true;
+  controls.enableDamping =
+    true;
 
-    controls.dampingFactor = 0.05;
+  controls.dampingFactor =
+    0.05;
 
-    controls.minDistance = 2;
+  controls.minDistance =
+    2;
 
-    controls.maxDistance = 15;
+  controls.maxDistance =
+    15;
 
-    controls.target.set(0, 0, 0);
-
-
-    // --------------------------------------------------
-    // GLTF Loader
-    // --------------------------------------------------
-
-    const loader = new GLTFLoader();
+  controls.enablePan =
+    false;
 
 
-    loader.load(
+  /*
+   * GLTF LOADER
+   */
 
-      "./AURA_Reactor_updated.glb",
-
-      // ------------------------------------------------
-      // SUCCESS
-      // ------------------------------------------------
-
-      (gltf) => {
-
-        console.log("AURA GLB loaded successfully.");
-
-        const model = gltf.scene;
-
-        scene.add(model);
+  const loader =
+    new GLTFLoader();
 
 
-        // ----------------------------------------------
-        // Calculate bounding box
-        // ----------------------------------------------
+  /*
+   * LOAD AURA GLB
+   */
 
-        const box = new THREE.Box3().setFromObject(model);
+  loader.load(
 
-        const center = box.getCenter(
+    "./AURA_Reactor_updated.glb",
+
+    (gltf) => {
+
+      console.log(
+        "AURA GLB loaded successfully"
+      );
+
+
+      /*
+       * GET MODEL
+       */
+
+      const model =
+        gltf.scene;
+
+
+      /*
+       * HIDE UNWANTED LARGE
+       * PLANE / GROUND OBJECTS
+       */
+
+      model.traverse(
+        (child) => {
+
+          if (!child.isMesh) {
+            return;
+          }
+
+
+          const objectBox =
+            new THREE.Box3()
+              .setFromObject(child);
+
+
+          const objectSize =
+            objectBox.getSize(
+              new THREE.Vector3()
+            );
+
+
+          const maxSize =
+            Math.max(
+              objectSize.x,
+              objectSize.y,
+              objectSize.z
+            );
+
+
+          const minSize =
+            Math.min(
+              objectSize.x,
+              objectSize.y,
+              objectSize.z
+            );
+
+
+          /*
+           * Detect extremely large
+           * flat objects.
+           */
+
+          if (
+            maxSize > 10 &&
+            minSize < maxSize * 0.05
+          ) {
+
+            console.log(
+              "Hidden large plane:",
+              child.name
+            );
+
+            child.visible =
+              false;
+
+          }
+
+        }
+      );
+
+
+      /*
+       * ADD MODEL TO SCENE
+       */
+
+      scene.add(
+        model
+      );
+
+
+      /*
+       * CALCULATE BOUNDING BOX
+       * AFTER HIDING PLANE
+       */
+
+      const box =
+        new THREE.Box3()
+          .setFromObject(model);
+
+
+      /*
+       * MODEL CENTER
+       */
+
+      const center =
+        box.getCenter(
           new THREE.Vector3()
         );
 
-        const size = box.getSize(
+
+      /*
+       * CENTER MODEL
+       */
+
+      model.position.sub(
+        center
+      );
+
+
+      /*
+       * GET MODEL SIZE
+       */
+
+      const size =
+        box.getSize(
           new THREE.Vector3()
         );
 
 
-        // ----------------------------------------------
-        // Center model
-        // ----------------------------------------------
-
-        model.position.sub(center);
-
-
-        // ----------------------------------------------
-        // Scale model
-        // ----------------------------------------------
-
-        const maxDimension = Math.max(
+      const maxDimension =
+        Math.max(
           size.x,
           size.y,
           size.z
         );
 
 
-        if (maxDimension > 0) {
+      /*
+       * AUTOMATIC SCALE
+       */
 
-          const scale = 4 / maxDimension;
+      if (
+        maxDimension > 0
+      ) {
 
-          model.scale.setScalar(scale);
+        const scale =
+          4 / maxDimension;
 
-        }
+        model.scale.setScalar(
+          scale
+        );
+
+      }
 
 
-        // ----------------------------------------------
-        // Play ALL animations
-        // ----------------------------------------------
+      /*
+       * PLAY ALL ANIMATIONS
+       */
 
-        if (gltf.animations.length > 0) {
+      if (
+        gltf.animations &&
+        gltf.animations.length > 0
+      ) {
 
-          console.log(
-            `Found ${gltf.animations.length} animations.`
+        console.log(
+          "Animations found:",
+          gltf.animations.length
+        );
+
+
+        const mixer =
+          new THREE.AnimationMixer(
+            model
           );
 
-          const mixer = new THREE.AnimationMixer(model);
 
-          gltf.animations.forEach((clip) => {
+        gltf.animations.forEach(
+          (clip) => {
 
-            console.log(
-              "Playing animation:",
-              clip.name
-            );
-
-            const action = mixer.clipAction(clip);
+            const action =
+              mixer.clipAction(
+                clip
+              );
 
             action.play();
 
-          });
-
-          model.userData.mixer = mixer;
-
-        } else {
-
-          console.log("No animations found in GLB.");
-
-        }
-
-
-        // ----------------------------------------------
-        // Store model
-        // ----------------------------------------------
-
-        scene.userData.model = model;
-
-
-        // ----------------------------------------------
-        // Camera
-        // ----------------------------------------------
-
-        camera.position.set(
-          0,
-          1.5,
-          6
+          }
         );
 
-        controls.target.set(
-          0,
-          0,
-          0
-        );
 
-        controls.update();
-
-
-        // ----------------------------------------------
-        // Hide loading
-        // ----------------------------------------------
-
-        loading.style.display = "none";
-
-      },
-
-
-      // ------------------------------------------------
-      // PROGRESS
-      // ------------------------------------------------
-
-      (progress) => {
-
-        if (progress.total) {
-
-          const percent =
-            (progress.loaded / progress.total) * 100;
-
-          loading.textContent =
-            `Loading AURA Reactor... ${percent.toFixed(0)}%`;
-
-        }
-
-      },
-
-
-      // ------------------------------------------------
-      // ERROR
-      // ------------------------------------------------
-
-      (error) => {
-
-        console.error(
-          "GLB loading error:",
-          error
-        );
-
-        loading.style.display = "none";
-
-        errorMessage.style.display = "flex";
-
-        errorMessage.innerHTML = `
-          <div>
-            <strong>Failed to load AURA Reactor</strong>
-            <br><br>
-            Check the browser console for details.
-          </div>
-        `;
+        model.userData.mixer =
+          mixer;
 
       }
 
-    );
+
+      /*
+       * SAVE MODEL
+       */
+
+      scene.userData.model =
+        model;
 
 
-    // --------------------------------------------------
-    // Animation Loop
-    // --------------------------------------------------
+      /*
+       * CAMERA
+       */
 
-    const clock = new THREE.Clock();
-
-
-    function animate() {
-
-      requestAnimationFrame(animate);
-
-
-      const delta = clock.getDelta();
+      camera.position.set(
+        0,
+        1.5,
+        6
+      );
 
 
-      const model = scene.userData.model;
-
-
-      if (
-        model &&
-        model.userData.mixer
-      ) {
-
-        model.userData.mixer.update(delta);
-
-      }
+      controls.target.set(
+        0,
+        0,
+        0
+      );
 
 
       controls.update();
 
 
-      renderer.render(
-        scene,
-        camera
+      /*
+       * HIDE LOADING
+       */
+
+      loading.style.display =
+        "none";
+
+
+      console.log(
+        "AURA Reactor ready!"
+      );
+
+    },
+
+
+    /*
+     * LOADING PROGRESS
+     */
+
+    (progress) => {
+
+      if (
+        progress.total > 0
+      ) {
+
+        const percent =
+          (
+            progress.loaded /
+            progress.total
+          ) * 100;
+
+        loading.textContent =
+          `Loading AURA Reactor... ${Math.round(percent)}%`;
+
+      }
+
+    },
+
+
+    /*
+     * ERROR
+     */
+
+    (error) => {
+
+      console.error(
+        "GLB loading error:",
+        error
+      );
+
+
+      loading.style.display =
+        "none";
+
+
+      errorMessage.style.display =
+        "block";
+
+    }
+
+  );
+
+
+  /*
+   * ANIMATION CLOCK
+   */
+
+  const clock =
+    new THREE.Clock();
+
+
+  /*
+   * ANIMATION LOOP
+   */
+
+  function animate() {
+
+    requestAnimationFrame(
+      animate
+    );
+
+
+    const delta =
+      clock.getDelta();
+
+
+    const model =
+      scene.userData.model;
+
+
+    /*
+     * UPDATE GLB ANIMATION
+     */
+
+    if (
+      model &&
+      model.userData.mixer
+    ) {
+
+      model.userData.mixer.update(
+        delta
       );
 
     }
 
 
-    animate();
+    /*
+     * UPDATE CONTROLS
+     */
+
+    controls.update();
 
 
-    // --------------------------------------------------
-    // Responsive
-    // --------------------------------------------------
+    /*
+     * RENDER
+     */
 
-    window.addEventListener(
-      "resize",
-      () => {
-
-        const width =
-          container.clientWidth;
-
-        const height =
-          container.clientHeight;
-
-
-        camera.aspect =
-          width / height;
-
-        camera.updateProjectionMatrix();
-
-
-        renderer.setSize(
-          width,
-          height
-        );
-
-      }
+    renderer.render(
+      scene,
+      camera
     );
 
-  </script>
+  }
+
+
+  animate();
+
+
+  /*
+   * RESPONSIVE
+   */
+
+  window.addEventListener(
+    "resize",
+    () => {
+
+      const width =
+        container.clientWidth;
+
+      const height =
+        container.clientHeight;
+
+
+      camera.aspect =
+        width / height;
+
+
+      camera.updateProjectionMatrix();
+
+
+      renderer.setSize(
+        width,
+        height
+      );
+
+    }
+  );
+
+</script>
 
 </body>
 </html>
